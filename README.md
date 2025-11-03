@@ -1,1 +1,7 @@
-WE HAVE A README NOW!
+# MA4N1 Group Project - Pi Irrationality
+
+### Members
+- Kitty Powell
+- Ben Wadsworth
+- Tristan Hartwell
+- Elizabeth Roxburgh
