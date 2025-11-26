@@ -9,24 +9,18 @@ noncomputable def f (n : ℕ) (a : ℚ) (b : ℚ) : Polynomial ℚ :=
 
 noncomputable def nfact_f (n : ℕ) (a b : ℚ) : Polynomial ℚ := C (n.factorial : ℚ) * f n a b
 
-lemma nfact_f_integral (n: ℕ) (a b : ℤ) :
-  ∃ pz : Polynomial ℤ, map (Int.castRingHom ℚ) pz = nfact_f n a b := by
-  use X^n * (C a - C b * X)^n
-  simp [eq_intCast]
-  rw [nfact_f, f]
-
-  have fact_cancel : C (n.factorial : ℚ) * C (1 / n.factorial : ℚ) = 1 := by
-    rw [map_mul_eq_one C]
-    field
-
-  rw [← mul_assoc, fact_cancel]
-  simp [one_mul]
+lemma nfact_f_integral (a b n: ℕ) :
+  ∃ f : ℤ[X], nfact_f n a b = f.map (algebraMap ℤ ℚ) := by
+    unfold nfact_f f
+    use X^n * (C (a : ℤ) - C (b : ℤ) * X)^n
+    ext
+    simp [field]
 
 lemma nfact_f_integral_coeffs (k a b n : ℕ) : ∃ z : ℤ,
   (nfact_f n a b).coeff k = (z : ℚ) := by
-    sorry
-
-
+    obtain ⟨f, hf⟩ := nfact_f_integral a b n
+    rw [hf]
+    simp
 
 open BigOperators
 open Finset
