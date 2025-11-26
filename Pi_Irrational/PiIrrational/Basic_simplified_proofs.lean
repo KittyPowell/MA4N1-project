@@ -28,9 +28,14 @@ open Finset
 noncomputable def F (n : ℕ) (a b : ℤ) : Polynomial ℚ :=
   ∑ k ∈ Finset.range (n + 1), (C (-1 : ℚ))^k * (derivative^[k] (f n a b))
 
-lemma eval_f_at_zero_is_0 (h : n ≠ 0): (f n a b).eval 0 = 0 := by
+lemma eval_f_at_zero_is_0 (n : ℕ) (a b : ℚ) (h : n ≠ 0): (f n a b).eval 0 = 0 := by
   simp [f, h]
 
-lemma f_derivs_integral_at_zero : ∀ k ∈ Finset.range (n + 1), ∃ z : ℤ,
-(derivative^[k] (f n a b)).eval 0 = (z : ℚ) := by
-sorry
+lemma symmetry_of_nfact_f (x : ℚ) (n : ℕ) (a b : ℚ) (hb : b ≠ 0) :
+(nfact_f n a b).eval x = (nfact_f n a b).eval ((a / b) - x) := by
+unfold nfact_f f
+simp
+constructor
+field_simp [hb]
+simp [← mul_assoc, ← mul_pow]
+field_simp
