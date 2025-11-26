@@ -31,11 +31,18 @@ noncomputable def F (n : ℕ) (a b : ℤ) : Polynomial ℚ :=
 lemma eval_f_at_zero_is_0 (n : ℕ) (a b : ℚ) (h : n ≠ 0): (f n a b).eval 0 = 0 := by
   simp [f, h]
 
-lemma symmetry_of_nfact_f (x : ℚ) (n : ℕ) (a b : ℚ) (hb : b ≠ 0) :
-(nfact_f n a b).eval x = (nfact_f n a b).eval ((a / b) - x) := by
-unfold nfact_f f
+lemma symmetry_of_f (x : ℚ) (n : ℕ) (a b : ℚ) (hb : b ≠ 0) :
+(f n a b).eval x = (f n a b).eval ((a / b) - x) := by
+unfold f
 simp
 constructor
 field_simp [hb]
 simp [← mul_assoc, ← mul_pow]
 field_simp
+
+lemma eval_f_at_aoverb_is_0 (n : ℕ) (a b : ℚ) (hb : b ≠ 0) (hn : n ≠ 0) :
+(f n a b).eval (a / b) = 0 := by
+  rw [symmetry_of_f]
+  · simp
+    exact eval_f_at_zero_is_0 n a b hn
+  exact hb
