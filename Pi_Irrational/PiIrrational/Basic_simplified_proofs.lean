@@ -9,7 +9,7 @@ noncomputable def f (n : ℕ) (a : ℚ) (b : ℚ) : Polynomial ℚ :=
 
 noncomputable def nfact_f (n : ℕ) (a b : ℚ) : Polynomial ℚ := C (n.factorial : ℚ) * f n a b
 
-lemma nfact_f_integral (a b n: ℕ) :
+lemma nfact_f_integral (a b n : ℕ) :
   ∃ f : ℤ[X], nfact_f n a b = f.map (algebraMap ℤ ℚ) := by
     unfold nfact_f f
     use X^n * (C (a : ℤ) - C (b : ℤ) * X)^n
@@ -46,3 +46,13 @@ lemma eval_f_at_aoverb_is_0 (n : ℕ) (a b : ℚ) (hb : b ≠ 0) (hn : n ≠ 0) 
   · simp
     exact eval_f_at_zero_is_0 n a b hn
   exact hb
+
+lemma f_integral_at_0 (n : ℕ) (a b : ℚ) (hn : n ≠ 0) : ∃ z : ℤ,
+(f n a b).eval 0 = (z : ℚ) := by
+  use 0
+  exact eval_f_at_zero_is_0 n a b hn
+
+lemma f_integral_at_aoverb (n : ℕ) (a b : ℚ) (hb : b ≠ 0) (hn : n ≠ 0) : ∃ z : ℤ,
+(f n a b).eval (a / b) = 0 := by
+  use 0
+  exact eval_f_at_aoverb_is_0 n a b hb hn
