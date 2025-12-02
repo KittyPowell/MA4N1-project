@@ -1,6 +1,7 @@
 import Mathlib
 
 set_option linter.style.commandStart false
+set_option linter.unusedTactic false
 
 open Polynomial
 
@@ -15,12 +16,14 @@ lemma nfact_f_integral (a b n : ℕ) :
     use X^n * (C (a : ℤ) - C (b : ℤ) * X)^n
     ext
     simp [field]
+    done
 
 lemma nfact_f_integral_coeffs (k a b n : ℕ) : ∃ z : ℤ,
   (nfact_f n a b).coeff k = (z : ℚ) := by
     obtain ⟨f, hf⟩ := nfact_f_integral a b n
     rw [hf]
     simp
+    done
 
 open BigOperators
 open Finset
@@ -30,20 +33,30 @@ noncomputable def F (n : ℕ) (a b : ℤ) : Polynomial ℚ :=
 
 lemma eval_f_at_zero_is_0 (n : ℕ) (a b : ℚ) (h : n ≠ 0): (f n a b).eval 0 = 0 := by
   simp [f, h]
+  done
 
 lemma symmetry_of_f (x : ℚ) (n : ℕ) (a b : ℚ) (hb : b ≠ 0) :
 (f n a b).eval x = (f n a b).eval ((a / b) - x) := by
-unfold f
-simp
-constructor
-field_simp [hb]
-simp [← mul_assoc, ← mul_pow]
-field_simp
+  unfold f
+  simp
+  constructor
+  field_simp [hb]
+  simp [← mul_assoc, ← mul_pow]
+  field_simp
+  done
 
-lemma symmetry_of_f_derivs (x : ℚ) (n k: ℕ) (a b : ℚ) (hb : b ≠ 0) (hk : k ≤ n) :
-(derivative^[k] (f n a b)).eval x =
-(-1 : ℚ)^k * (derivative^[k] (f n a b)).eval ((a / b) - x) := by
-  sorry
+lemma symmetry_of_f_derivs (x : ℚ) (n k: ℕ) (a b : ℚ) (hb : b ≠ 0) :
+(iteratedDeriv k (f n a b)) x =
+(-1 : ℚ)^k * (iteratedDeriv k (f n a b)) ((a / b) - x) := by
+  induction k with
+  | zero =>
+    simp
+    exact symmetry_of_f x n a b hb
+  | succ n _ =>
+    expose_names
+    simp
+    sorry
+    done
 
 lemma eval_f_at_aoverb_is_0 (n : ℕ) (a b : ℚ) (hb : b ≠ 0) (hn : n ≠ 0) :
 (f n a b).eval (a / b) = 0 := by
@@ -51,20 +64,24 @@ lemma eval_f_at_aoverb_is_0 (n : ℕ) (a b : ℚ) (hb : b ≠ 0) (hn : n ≠ 0) 
   · simp
     exact eval_f_at_zero_is_0 n a b hn
   exact hb
+  done
 
 lemma f_integral_at_0 (n : ℕ) (a b : ℚ) (hn : n ≠ 0) : ∃ z : ℤ,
 (f n a b).eval 0 = (z : ℚ) := by
   use 0
   exact eval_f_at_zero_is_0 n a b hn
+  done
 
 lemma f_integral_at_pi (n : ℕ) (a b : ℚ) (hb : b ≠ 0) (hn : n ≠ 0) : ∃ z : ℤ,
 (f n a b).eval (a / b) = 0 := by
   use 0
   exact eval_f_at_aoverb_is_0 n a b hb hn
+  done
 
 lemma f_derivs_integral_at_zero (n k : ℕ) (a b : ℤ) (hk : k ≤ n) :
 ∃ z : ℤ, (derivative^[k] (f n a b)).eval 0 = (z : ℚ) := by
   sorry
+  done
 
 lemma f_derivs_integral_at_pi (n k : ℕ) (a b : ℤ) (hb : b ≠ 0) (hk : k ≤ n):
 ∃ z : ℤ, (derivative^[k] (f n a b)).eval (a / b : ℚ) = (z : ℚ) := by
@@ -72,19 +89,22 @@ lemma f_derivs_integral_at_pi (n k : ℕ) (a b : ℤ) (hb : b ≠ 0) (hk : k ≤
   have hbQ : (b : ℚ) ≠ 0 := by
     exact_mod_cast hb
 
-  simp [symmetry_of_f_derivs (a / b : ℚ) n k a b hbQ hk]
+  simp [symmetry_of_f_derivs (a / b : ℚ) n k a b hbQ]
   obtain ⟨z, hz⟩ := f_derivs_integral_at_zero n k a b hk
   simp [hz]
   use (-1)^k * z
   simp
+  done
 
 lemma f_times_sin_greater_than_zero (x : ℝ) (n : ℕ) (a b : ℚ)
 (hxl : 0 < x) (hxu : x < Real.pi) :
 0 < ((Polynomial.map (algebraMap ℚ ℝ) (f n a b)).eval x * Real.sin x) := by
   sorry
+  done
 
 lemma f_times_sin_less_than_bound (x : ℝ) (n : ℕ) (a b : ℚ)
 (hxl : 0 < x) (hxu : x < Real.pi) :
     ((Polynomial.map (algebraMap ℚ ℝ) (f n a b)).eval x * Real.sin x)
       < (Real.pi ^ n * (a : ℝ) ^ n) / (n.factorial : ℝ) := by
   sorry
+  done
