@@ -77,3 +77,14 @@ lemma f_derivs_integral_at_pi (n k : ℕ) (a b : ℤ) (hb : b ≠ 0) (hk : k ≤
   simp [hz]
   use (-1)^k * z
   simp
+
+lemma f_times_sin_greater_than_zero (x : ℝ) (n : ℕ) (a b : ℚ)
+(hxl : 0 < x) (hxu : x < Real.pi) :
+0 < ((Polynomial.map (algebraMap ℚ ℝ) (f n a b)).eval x * Real.sin x) := by
+  sorry
+
+lemma f_times_sin_less_than_bound (x : ℝ) (n : ℕ) (a b : ℚ)
+(hxl : 0 < x) (hxu : x < Real.pi) :
+    ((Polynomial.map (algebraMap ℚ ℝ) (f n a b)).eval x * Real.sin x)
+      < (Real.pi ^ n * (a : ℝ) ^ n) / (n.factorial : ℝ) := by
+  sorry
