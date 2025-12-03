@@ -103,15 +103,42 @@ lemma f_derivs_integral_at_pi (n k : ℕ) (a b : ℤ) (hb : b ≠ 0) (hk : k ≤
   simp
   done
 
-lemma f_times_sin_greater_than_zero (x : ℝ) (n : ℕ) (a b : ℚ)
+lemma f_times_sin_greater_than_zero (x : ℝ) (n : ℕ) (a b : ℚ) (hb : b ≠ 0)
 (hxl : 0 < x) (hxu : x < Real.pi) :
 0 < ((Polynomial.map (algebraMap ℚ ℝ) (f n a b)).eval x * Real.sin x) := by
-  sorry
+  have h1 : 0 < Real.sin x := by
+    exact Real.sin_pos_of_pos_of_lt_pi hxl hxu
+
+  have h2 : 0 < (Polynomial.map (algebraMap ℚ ℝ) (f n a b)).eval x := by
+    sorry
+  exact mul_pos h2 h1
   done
 
 lemma f_times_sin_less_than_bound (x : ℝ) (n : ℕ) (a b : ℚ)
 (hxl : 0 < x) (hxu : x < Real.pi) :
-    ((Polynomial.map (algebraMap ℚ ℝ) (f n a b)).eval x * Real.sin x)
-      < (Real.pi ^ n * (a : ℝ) ^ n) / (n.factorial : ℝ) := by
+((Polynomial.map (algebraMap ℚ ℝ) (f n a b)).eval x * Real.sin x)
+< (Real.pi ^ n * (a : ℝ) ^ n) / (n.factorial : ℝ) := by
+
+  have h : (Polynomial.map (algebraMap ℚ ℝ) (f n a b)).eval x < (Real.pi^n * a^n) / n.factorial := by
+    simp [f]
+    field_simp
+    have h1 : x^(n + 1) < Real.pi^(n + 1) := by
+      induction n with
+      | zero =>
+        simp
+        assumption
+      | succ n _ =>
+        expose_names
+        rw [pow_add]
+        have h11 : Real.pi^(n + 1 + 1) = Real.pi^(n + 1) * Real.pi := by
+          simp [pow_add]
+        simp [h11]
+        sorry
+        -- find a lemma that says for x,y,a,b suitable, x < y and a < b implies xa < yb
+    -- Apply the same lemma as above here then the proof is done.
   sorry
+  done
+
+
+
   done
