@@ -58,11 +58,13 @@ lemma symmetry_of_f_derivs_new (n k: ℕ) (a b : ℚ) (hb : b ≠ 0) :
   | zero => sorry
 
   | succ n _ =>
-    expose_names
-    rw [← Function.comp_iterate_pred_of_pos, Function.comp_apply]
-    simp
-    rw [h]
+    --expose_names
+    --rw [← Function.comp_iterate_pred_of_pos, Function.comp_apply]
+    --simp
+    --rw [h]
+    --The above makes some progress
     sorry
+  done
 
 
 lemma eval_f_at_aoverb_is_0 (n : ℕ) (a b : ℚ) (hb : b ≠ 0) (hn : n ≠ 0) :
@@ -119,7 +121,8 @@ lemma f_times_sin_less_than_bound (x : ℝ) (n : ℕ) (a b : ℚ)
 ((Polynomial.map (algebraMap ℚ ℝ) (f n a b)).eval x * Real.sin x)
 < (Real.pi ^ n * (a : ℝ) ^ n) / (n.factorial : ℝ) := by
 
-  have h : (Polynomial.map (algebraMap ℚ ℝ) (f n a b)).eval x < (Real.pi^n * a^n) / n.factorial := by
+  have h : (Polynomial.map (algebraMap ℚ ℝ) (f n a b)).eval x <
+  (Real.pi^n * a^n) / n.factorial := by
     simp [f]
     field_simp
     have h1 : x^(n + 1) < Real.pi^(n + 1) := by
@@ -135,10 +138,7 @@ lemma f_times_sin_less_than_bound (x : ℝ) (n : ℕ) (a b : ℚ)
         simp [h11]
         sorry
         -- find a lemma that says for x,y,a,b suitable, x < y and a < b implies xa < yb
-    -- Apply the same lemma as above here then the proof is done.
+    -- This seems reasonable to prove
+    sorry
+  -- The same xa < yb lemma will prove this part
   sorry
-  done
-
-
-
-  done
