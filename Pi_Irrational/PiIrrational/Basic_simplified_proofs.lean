@@ -37,10 +37,9 @@ lemma eval_f_at_zero_is_0 (n : ℕ) (a b : ℚ) (h : n ≠ 0): (f n a b).eval 0 
 
 lemma symmetry_of_f (x : ℚ) (n : ℕ) (a b : ℚ) (hb : b ≠ 0) :
 (f n a b).eval x = (f n a b).eval ((a / b) - x) := by
-  unfold f
-  simp
+  simp [f]
   constructor
-  field_simp [hb]
+  field_simp
   simp [← mul_assoc, ← mul_pow]
   field_simp
   done
@@ -140,5 +139,7 @@ lemma f_times_sin_less_than_bound (x : ℝ) (n : ℕ) (a b : ℚ)
         -- find a lemma that says for x,y,a,b suitable, x < y and a < b implies xa < yb
     -- This seems reasonable to prove
     sorry
-  -- The same xa < yb lemma will prove this part
+  obtain := Real.sin_le_one x
+  expose_names
+  -- The same xa < yb lemma will prove this part using Real.sin_le_one
   sorry
