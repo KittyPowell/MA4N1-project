@@ -45,18 +45,19 @@ lemma symmetry_of_f (x : ℚ) (n : ℕ) (a b : ℚ) (hb : b ≠ 0) :
   field_simp
   done
 
-lemma symmetry_of_f_derivs (x : ℚ) (n k: ℕ) (a b : ℚ) (hb : b ≠ 0) :
-(iteratedDeriv k (f n a b)) x =
-(-1 : ℚ)^k * (iteratedDeriv k (f n a b)) ((a / b) - x) := by
+lemma symmetry_of_f_derivs (n k: ℕ) (a b : ℚ) (hb : b ≠ 0) :
+(derivative^[k] (f n a b)) =
+(C (-1 : ℚ))^k * (derivative^[k] (f n a b)).comp ( C (a / b) - X) := by
   induction k with
-  | zero =>
-    simp
-    exact symmetry_of_f x n a b hb
+  | zero => sorry
+
   | succ n _ =>
     expose_names
+    rw [← Function.comp_iterate_pred_of_pos, Function.comp_apply]
     simp
+    rw [h]
     sorry
-    done
+
 
 lemma eval_f_at_aoverb_is_0 (n : ℕ) (a b : ℚ) (hb : b ≠ 0) (hn : n ≠ 0) :
 (f n a b).eval (a / b) = 0 := by
