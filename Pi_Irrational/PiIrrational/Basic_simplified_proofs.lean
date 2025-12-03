@@ -45,7 +45,13 @@ lemma symmetry_of_f (x : ℚ) (n : ℕ) (a b : ℚ) (hb : b ≠ 0) :
   field_simp
   done
 
-lemma symmetry_of_f_derivs (n k: ℕ) (a b : ℚ) (hb : b ≠ 0) :
+
+lemma symmetry_of_f_derivs (x : ℚ) (n k: ℕ) (a b : ℚ) (hb : b ≠ 0) (hk : k ≤ n) :
+(derivative^[k] (f n a b)).eval x =
+(-1 : ℚ)^k * (derivative^[k] (f n a b)).eval ((a / b) - x) := by
+  sorry
+
+lemma symmetry_of_f_derivs_new (n k: ℕ) (a b : ℚ) (hb : b ≠ 0) :
 (derivative^[k] (f n a b)) =
 (C (-1 : ℚ))^k * (derivative^[k] (f n a b)).comp ( C (a / b) - X) := by
   induction k with
@@ -90,7 +96,7 @@ lemma f_derivs_integral_at_pi (n k : ℕ) (a b : ℤ) (hb : b ≠ 0) (hk : k ≤
   have hbQ : (b : ℚ) ≠ 0 := by
     exact_mod_cast hb
 
-  simp [symmetry_of_f_derivs (a / b : ℚ) n k a b hbQ]
+  simp [symmetry_of_f_derivs (a / b : ℚ) n k a b hbQ hk]
   obtain ⟨z, hz⟩ := f_derivs_integral_at_zero n k a b hk
   simp [hz]
   use (-1)^k * z
