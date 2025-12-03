@@ -141,5 +141,5 @@ lemma f_times_sin_less_than_bound (x : ℝ) (n : ℕ) (a b : ℚ)
     sorry
   obtain := Real.sin_le_one x
   expose_names
-  -- The same xa < yb lemma will prove this part using Real.sin_le_one
+  -- The same xa < yb lemma will prove this part as most of the work is done by h_1 and h
   sorry
