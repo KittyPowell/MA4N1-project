@@ -143,3 +143,14 @@ lemma f_times_sin_less_than_bound (x : ℝ) (n : ℕ) (a b : ℚ)
   expose_names
   -- The same xa < yb lemma will prove this part as most of the work is done by h_1 and h
   sorry
+
+-- Defining the definite integral of f(x) * sin(x) from 0 to pi
+noncomputable def definite_integral_f_sin (n : ℕ) (a b : ℚ) : ℝ :=
+  ∫ x in 0..Real.pi, (Polynomial.map (algebraMap ℚ ℝ) (f n a b)).eval x * Real.sin x
+
+-- Lemma to show integral above = F(pi) + F(0)
+lemma f_sin_integral_equals_F_eval_pi_plus_F_eval_0 (n : ℕ) (a b : ℤ) :
+  definite_integral_f_sin n (a : ℚ) (b : ℚ) =
+  (Polynomial.map (algebraMap ℚ ℝ) (F n a b)).eval Real.pi +
+  (Polynomial.map (algebraMap ℚ ℝ) (F n a b)).eval 0 := by
+    sorry
