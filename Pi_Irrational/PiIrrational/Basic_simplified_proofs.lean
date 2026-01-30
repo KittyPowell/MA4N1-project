@@ -45,6 +45,25 @@ lemma symmetry_of_f (x : ℚ) (n : ℕ) (a b : ℚ) (hb : b ≠ 0) :
   done
 
 
+lemma symmetry_of_f_uniform (n : ℕ) (a b : ℚ) (hb : b ≠ 0)(hn: n>0) :
+(f n a b) = (f n a b).comp (C (a / b) - X) := by
+  rw [f]
+  simp
+  left
+  have h :
+    C a - C b * (C (a / b) - X) = C b * X := by
+    ring_nf
+    simp [← mul_assoc]
+    simp[←mul_comm]
+    rw[mul_comm]
+    rw[mul_assoc]
+    rw [← Polynomial.C_mul]
+    simp [hb]
+  simp[h]
+  -- this is extremely trivial but lean will not prove it
+  rw [← mul_pow,← mul_pow]
+  sorry
+
 lemma symmetry_of_f_poly (n : ℕ) (a b : ℚ) (hb : b ≠ 0) :
 f n a b = (f n a b).comp (C (a / b) - X) := by
   apply Polynomial.funext
