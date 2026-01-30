@@ -54,13 +54,14 @@ lemma symmetry_of_f_derivs_new (n k: ℕ) (a b : ℚ) (hb : b ≠ 0) :
 (derivative^[k] (f n a b)) =
 (C (-1 : ℚ))^k * (derivative^[k] (f n a b)).comp ( C (a / b) - X) := by
   induction k with
-  | zero => sorry
+  | zero =>
+    simp []
 
   | succ n _ =>
-    --expose_names
-    --rw [← Function.comp_iterate_pred_of_pos, Function.comp_apply]
-    --simp
-    --rw [h]
+    expose_names
+    simp
+    rw [← Function.comp_iterate_pred_of_pos, Function.comp_apply]
+    simp
     --The above makes some progress
     sorry
   done
@@ -154,3 +155,59 @@ lemma f_sin_integral_equals_F_eval_pi_plus_F_eval_0 (n : ℕ) (a b : ℤ) :
   (Polynomial.map (algebraMap ℚ ℝ) (F n a b)).eval Real.pi +
   (Polynomial.map (algebraMap ℚ ℝ) (F n a b)).eval 0 := by
     sorry
+
+
+
+lemma symmetry_of_f_poly (n : ℕ) (a b : ℚ) (hb : b ≠ 0) :
+f n a b = (f n a b).comp (C (a / b) - X) := by
+  apply Polynomial.funext
+  intro x
+  simpa [Polynomial.eval_comp, sub_eq_add_neg,
+  add_comm, add_left_comm, add_assoc] using
+  (symmetry_of_f x n a b hb)
+
+lemma symmetry_of_f_derivs_2 (n k : ℕ) (a b : ℚ) (hb : b ≠ 0) :
+(derivative^[k] (f n a b)) = (C (-1 : ℚ))^k * (derivative^[k] (f n a b)).comp (C (a / b) - X) := by
+  classical
+  let q : Polynomial ℚ := C (a / b) - X
+  have hqder : q.derivative = C (-1 : ℚ) := by
+    simp [q]
+
+  have derivative_negOne_pow : ∀ m : ℕ, derivative ((-1 : Polynomial ℚ) ^ m) = 0 := by
+    intro m
+    induction m with
+    | zero =>
+        simp
+    | succ m hm =>
+        rw [pow_succ]
+        rw [derivative_mul]
+        simp [hm]
+
+  induction k with
+  | zero =>
+      simpa [q] using (symmetry_of_f_poly n a b hb)
+
+  | succ k ih =>
+      have ih' := congrArg (fun p : Polynomial ℚ => p.derivative) ih
+
+      have hconst' : derivative ((-1 : Polynomial ℚ) ^ k) = 0 := by
+        exact derivative_negOne_pow k
+
+      have ih_simplified :
+          (derivative^[Nat.succ k] (f n a b))
+            =
+          (C (-1 : ℚ))^k *
+            ((derivative^[Nat.succ k] (f n a b)).comp q) * (C (-1 : ℚ)) := by
+        simpa [Function.iterate_succ_apply', q, hqder,
+              derivative_mul, derivative_comp, hconst',
+              mul_assoc, mul_left_comm, mul_comm] using ih'
+
+      calc
+        (derivative^[Nat.succ k] (f n a b))
+            =
+          (C (-1 : ℚ))^k *
+            ((derivative^[Nat.succ k] (f n a b)).comp q) * (C (-1 : ℚ)) := ih_simplified
+        _ =
+          (C (-1 : ℚ))^(Nat.succ k) *
+            ((derivative^[Nat.succ k] (f n a b)).comp q) := by
+          simp [pow_succ, mul_comm]
