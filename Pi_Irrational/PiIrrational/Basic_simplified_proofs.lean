@@ -156,7 +156,7 @@ lemma f_derivs_integral_at_pi (n k : ℕ) (a b : ℤ) (hb : b ≠ 0) (hk : k ≤
   simp
   done
 
-lemma f_times_sin_greater_than_zero (x : ℝ) (n : ℕ) (a b : ℚ) (hb : b ≠ 0)
+lemma f_times_sin_greater_than_zero (x : ℝ) (n : ℕ) (a b : ℚ) (hb : b > 0) (h : Real.pi = a / b)
 (hxl : 0 < x) (hxu : x < Real.pi) :
 0 < ((Polynomial.map (algebraMap ℚ ℝ) (f n a b)).eval x * Real.sin x) := by
   have h1 : 0 < Real.sin x := by
@@ -165,7 +165,20 @@ lemma f_times_sin_greater_than_zero (x : ℝ) (n : ℕ) (a b : ℚ) (hb : b ≠ 
   have h2 : 0 < (Polynomial.map (algebraMap ℚ ℝ) (f n a b)).eval x := by
     rw [f]
     simp
-    sorry
+    apply mul_pos
+    · simp
+      exact Nat.factorial_pos n
+    apply mul_pos
+    · exact pow_pos hxl n
+    apply pow_pos
+    simp
+    have h_eq : (a : ℝ) = (b : ℝ) * Real.pi := by
+      rw [h]
+      field_simp
+    rw [h_eq]
+    have h_ineq : ↑b * x < ↑b * Real.pi := by
+      rel [hxu]
+    exact h_ineq
   exact mul_pos h2 h1
   done
 -- In the following we assume pi = a/b when we say x < a/b
