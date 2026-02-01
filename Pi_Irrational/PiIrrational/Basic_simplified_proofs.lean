@@ -155,13 +155,13 @@ lemma f_derivs_integral_at_zero (n k : ℕ) (a b : ℤ) (hn : n > 0) (hk : k ≤
 
   sorry
 
-lemma f_derivs_integral_at_pi (n k : ℕ) (a b : ℤ) (hb : b ≠ 0) (hk : k ≤ n):
+lemma f_derivs_integral_at_pi (n k : ℕ) (a b : ℤ) (hn : n > 0) (hb : b ≠ 0) (hk : k ≤ n):
 ∃ z : ℤ, (derivative^[k] (f n a b)).eval (a / b : ℚ) = (z : ℚ) := by
 
   have hbQ : (b : ℚ) ≠ 0 := by
     exact_mod_cast hb
   rw [symmetry_of_f_derivs n k a b hbQ]
-  obtain ⟨z, hz⟩ := f_derivs_integral_at_zero n k a b hk
+  obtain ⟨z, hz⟩ := f_derivs_integral_at_zero n k a b hn hk
   simp [hz]
   use (-1)^k * z
   simp
