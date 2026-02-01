@@ -168,9 +168,9 @@ lemma f_times_sin_greater_than_zero (x : ℝ) (n : ℕ) (a b : ℚ) (hb : b ≠ 
     sorry
   exact mul_pos h2 h1
   done
-
+-- In the following we assume pi = a/b when we say x < a/b
 lemma f_times_sin_less_than_bound (x : ℝ) (n : ℕ) (a b : ℚ)
-(hxl : 0 < x) (hxu : x < Real.pi) :
+(hxl : 0 < x) (hxu : x < Real.pi) (hn : n ≠ 0) (ha : a ≥ 0) (hb : b > 0) (h : Real.pi = a / b):
 ((Polynomial.map (algebraMap ℚ ℝ) (f n a b)).eval x * Real.sin x)
 < (Real.pi ^ n * (a : ℝ) ^ n) / (n.factorial : ℝ) := by
 
@@ -185,29 +185,71 @@ lemma f_times_sin_less_than_bound (x : ℝ) (n : ℕ) (a b : ℚ)
         assumption
       | succ n _ =>
         expose_names
-        rw [pow_add]
-        have h11 : Real.pi^(n + 1 + 1) = Real.pi^(n + 1) * Real.pi := by
-          simp [pow_add]
-        simp [h11]
-        have hxpos : 0 < x := hxl
-        have hpi_pos : 0 < Real.pi := Real.pi_pos
-        have hpi_pow_pos : 0 < Real.pi ^ (n + 1) := by
-          exact pow_pos hpi_pos (n + 1)
+        refine pow_lt_pow_left₀ hxu ?_ ?_
+        · exact Std.le_of_lt hxl
+        exact Ne.symm (Nat.zero_ne_add_one (n + 1))
+    refine mul_lt_mul_of_pos_of_nonneg' ?_ ?_ ?_ ?_
+    · refine pow_lt_pow_left₀ hxu ?_ hn
+      exact Std.le_of_lt hxl
+    · refine (pow_le_pow_iff_left₀ ?_ ?_ hn).mpr ?_
+      · simp
+        have h_eq : (a : ℝ) = (b : ℝ) * Real.pi := by
+          rw [h]
+          field_simp
+        rw [h_eq]
+        have h_ineq : ↑b * x < ↑b * Real.pi := by
+          rel [hxu]
+        exact Std.le_of_lt h_ineq
+      · exact Rat.cast_nonneg.mpr ha
+      simp
+      apply mul_nonneg
+      · positivity
+      positivity
 
-        have h1 : x ^ (n + 1) * x < Real.pi ^ (n + 1) * x := by
-          exact mul_lt_mul_of_pos_right h hxpos
 
-        have h2 : Real.pi ^ (n + 1) * x < Real.pi ^ (n + 1) * Real.pi := by
-          exact mul_lt_mul_of_pos_left hxu hpi_pow_pos
+    · refine pow_pos ?_ n
+      simp
+      have h_eq : ↑a = ↑b * Real.pi := by
+        rw [h]
+        field_simp
+      have h_ineq : ↑b * x < ↑b * Real.pi := by
+        rel [hxu]
+      rw [← h_eq] at h_ineq
+      exact h_ineq
+    refine pow_nonneg ?_ n
+    exact Real.pi_nonneg
 
-        exact mul_lt_mul_of_pos' h hxu hxl hpi_pow_pos
-        -- find a lemma that says for x,y,a,b suitable, x < y and a < b implies xa < yb
-    -- This seems reasonable to prove
-    sorry
   obtain := Real.sin_le_one x
   expose_names
-  -- The same xa < yb lemma will prove this part as most of the work is done by h_1 and h
-  sorry
+
+  have h_poly_nonneg : 0 ≤ (Polynomial.map (algebraMap ℚ ℝ) (f n a b)).eval x := by
+    rw [f]
+    simp
+    apply mul_nonneg
+    · simp
+    apply mul_nonneg
+    · refine pow_nonneg ?_ n
+      exact Std.le_of_lt hxl
+    apply pow_nonneg
+    have h_eq : (a : ℝ) = (b : ℝ) * Real.pi := by
+      rw [h_1]
+      field_simp
+    rw [h_eq]
+    simp
+    rw [h_1]
+    field_simp
+    rw [h_eq]
+    field_simp
+    exact Std.le_of_lt hxu
+
+  have h_sin_pos : 0 < Real.sin x := Real.sin_pos_of_mem_Ioo ⟨hxl, hxu⟩
+  have h_prod_le : eval x (Polynomial.map (algebraMap ℚ ℝ) (f n a b)) * Real.sin x
+  ≤ eval x (Polynomial.map (algebraMap ℚ ℝ) (f n a b)) := by
+    apply mul_le_of_le_one_right h_poly_nonneg h_2
+
+  exact h_prod_le.trans_lt h
+
+  done
 
 -- Defining the definite integral of f(x) * sin(x) from 0 to pi
 noncomputable def definite_integral_f_sin (n : ℕ) (a b : ℚ) : ℝ :=
