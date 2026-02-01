@@ -60,9 +60,14 @@ lemma symmetry_of_f_uniform (n : ℕ) (a b : ℚ) (hb : b ≠ 0)(hn: n>0) :
     rw [← Polynomial.C_mul]
     simp [hb]
   simp[h]
-  -- this is extremely trivial but lean will not prove it
+
   rw [← mul_pow,← mul_pow]
-  sorry
+  have h_base : X * (C a - C b * X) = (C (a / b) - X) * (C b * X) := by
+    have h_sub : C a - C b * X = C b * (C (a / b) - X) := by
+      linear_combination h
+    rw [h_sub]
+    ring
+  rw [h_base]
 
 lemma symmetry_of_f_poly (n : ℕ) (a b : ℚ) (hb : b ≠ 0) :
 f n a b = (f n a b).comp (C (a / b) - X) := by
@@ -139,10 +144,16 @@ lemma f_integral_at_pi (n : ℕ) (a b : ℚ) (hb : b ≠ 0) (hn : n ≠ 0) : ∃
   exact eval_f_at_aoverb_is_0 n a b hb hn
   done
 
-lemma f_derivs_integral_at_zero (n k : ℕ) (a b : ℤ) (hk : k ≤ n) :
+lemma f_derivs_integral_at_zero (n k : ℕ) (a b : ℤ) (hn : n > 0) (hk : k ≤ n) :
 ∃ z : ℤ, (derivative^[k] (f n a b)).eval 0 = (z : ℚ) := by
+  rw [f]
+  let p : ℤ[X] := X^n * (C a - C b * X)^n
+
+  have h_coeff : (f n a b).coeff k = (p.map (algebraMap ℤ ℚ)).coeff k / (n.factorial) := by
+    simp [f,p]
+    ring
+
   sorry
-  done
 
 lemma f_derivs_integral_at_pi (n k : ℕ) (a b : ℤ) (hb : b ≠ 0) (hk : k ≤ n):
 ∃ z : ℤ, (derivative^[k] (f n a b)).eval (a / b : ℚ) = (z : ℚ) := by
