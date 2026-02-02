@@ -262,13 +262,12 @@ lemma f_times_sin_greater_than_zero (x : ℝ) (n : ℕ) (a b : ℚ) (hb : b > 0)
     · exact pow_pos hxl n
     apply pow_pos
     simp
+
     have h_eq : (a : ℝ) = (b : ℝ) * Real.pi := by
       rw [h]
       field_simp
     rw [h_eq]
-    have h_ineq : ↑b * x < ↑b * Real.pi := by
-      rel [hxu]
-    exact h_ineq
+    rel [hxu]
   exact mul_pos h2 h1
   done
 
