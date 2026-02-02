@@ -5,11 +5,15 @@ set_option linter.unusedTactic false
 
 open Polynomial
 
+-- Definition by Kitty
 noncomputable def f (n : ℕ) (a : ℚ) (b : ℚ) : Polynomial ℚ :=
   (C (1 / (n.factorial : ℚ))) * (X^n * (C a - C b * X)^n)
 
+-- Definition by Ben
 noncomputable def nfact_f (n : ℕ) (a b : ℚ) : Polynomial ℚ := C (n.factorial : ℚ) * f n a b
 
+-- Statement by Ben
+-- Proof by Ben
 lemma nfact_f_integral (a b n : ℕ) :
   ∃ f : ℤ[X], nfact_f n a b = f.map (algebraMap ℤ ℚ) := by
     unfold nfact_f f
@@ -18,6 +22,8 @@ lemma nfact_f_integral (a b n : ℕ) :
     simp [field]
     done
 
+-- Statement by Kitty
+-- Proof by Ben
 lemma nfact_f_integral_coeffs (k a b n : ℕ) : ∃ z : ℤ,
   (nfact_f n a b).coeff k = (z : ℚ) := by
     obtain ⟨f, hf⟩ := nfact_f_integral a b n
@@ -28,13 +34,18 @@ lemma nfact_f_integral_coeffs (k a b n : ℕ) : ∃ z : ℤ,
 open BigOperators
 open Finset
 
+-- Definition by Ben
 noncomputable def F (n : ℕ) (a b : ℤ) : Polynomial ℚ :=
-  ∑ k ∈ Finset.range (n + 1), (C (-1 : ℚ))^k * (derivative^[k] (f n a b))
+  ∑ k ∈ Finset.range (n+1), (C (-1 : ℚ))^k * (derivative^[2*k] (f n a b))
 
+-- Statement by Ben
+-- Proof by Ben
 lemma eval_f_at_zero_is_0 (n : ℕ) (a b : ℚ) (h : n ≠ 0): (f n a b).eval 0 = 0 := by
   simp [f, h]
   done
 
+-- statement by Ben
+-- proof by Ben and Kitty
 lemma symmetry_of_f (x : ℚ) (n : ℕ) (a b : ℚ) (hb : b ≠ 0) :
 (f n a b).eval x = (f n a b).eval ((a / b) - x) := by
   simp [f]
@@ -44,8 +55,9 @@ lemma symmetry_of_f (x : ℚ) (n : ℕ) (a b : ℚ) (hb : b ≠ 0) :
   field_simp
   done
 
-
-lemma symmetry_of_f_uniform (n : ℕ) (a b : ℚ) (hb : b ≠ 0)(hn: n>0) :
+-- statement by Ben
+-- proof by Ben
+lemma symmetry_of_f_uniform (n : ℕ) (a b : ℚ) (hb : b ≠ 0) (hn: n>0) :
 (f n a b) = (f n a b).comp (C (a / b) - X) := by
   rw [f]
   simp
@@ -69,6 +81,8 @@ lemma symmetry_of_f_uniform (n : ℕ) (a b : ℚ) (hb : b ≠ 0)(hn: n>0) :
     ring
   rw [h_base]
 
+-- statement originally by Kitty
+-- proof and edits by Ben
 lemma symmetry_of_f_poly (n : ℕ) (a b : ℚ) (hb : b ≠ 0) :
 f n a b = (f n a b).comp (C (a / b) - X) := by
   apply Polynomial.funext
@@ -77,6 +91,8 @@ f n a b = (f n a b).comp (C (a / b) - X) := by
   add_comm, add_left_comm, add_assoc] using
   (symmetry_of_f x n a b hb)
 
+-- statement by Ben
+-- proof by Ben
 lemma symmetry_of_f_derivs (n k : ℕ) (a b : ℚ) (hb : b ≠ 0) :
 (derivative^[k] (f n a b)) = (C (-1 : ℚ))^k * (derivative^[k] (f n a b)).comp (C (a / b) - X) := by
   classical
@@ -123,7 +139,8 @@ lemma symmetry_of_f_derivs (n k : ℕ) (a b : ℚ) (hb : b ≠ 0) :
             ((derivative^[Nat.succ k] (f n a b)).comp q) := by
           simp [pow_succ, mul_comm]
 
-
+-- Statement by Ben
+-- Proof by Ben
 lemma eval_f_at_aoverb_is_0 (n : ℕ) (a b : ℚ) (hb : b ≠ 0) (hn : n ≠ 0) :
 (f n a b).eval (a / b) = 0 := by
   rw [symmetry_of_f]
@@ -132,29 +149,88 @@ lemma eval_f_at_aoverb_is_0 (n : ℕ) (a b : ℚ) (hb : b ≠ 0) (hn : n ≠ 0) 
   exact hb
   done
 
+-- Statement by Ben
+-- Proof by Ben
 lemma f_integral_at_0 (n : ℕ) (a b : ℚ) (hn : n ≠ 0) : ∃ z : ℤ,
 (f n a b).eval 0 = (z : ℚ) := by
   use 0
   exact eval_f_at_zero_is_0 n a b hn
   done
 
+-- Statement by Ben
+-- Proof by Ben
 lemma f_integral_at_pi (n : ℕ) (a b : ℚ) (hb : b ≠ 0) (hn : n ≠ 0) : ∃ z : ℤ,
 (f n a b).eval (a / b) = 0 := by
   use 0
   exact eval_f_at_aoverb_is_0 n a b hb hn
   done
 
+-- statement by Ben
+-- proof by Ben
 lemma f_derivs_integral_at_zero (n k : ℕ) (a b : ℤ) (hn : n > 0) (hk : k ≤ n) :
-∃ z : ℤ, (derivative^[k] (f n a b)).eval 0 = (z : ℚ) := by
+  ∃ z : ℤ, (derivative^[k] (f n a b)).eval 0 = (z : ℚ) := by
+  rw [← coeff_zero_eq_eval_zero, coeff_iterate_derivative]
   rw [f]
-  let p : ℤ[X] := X^n * (C a - C b * X)^n
 
-  have h_coeff : (f n a b).coeff k = (p.map (algebraMap ℤ ℚ)).coeff k / (n.factorial) := by
-    simp [f,p]
-    ring
+  rw [coeff_C_mul]
 
-  sorry
 
+  simp only [zero_add]
+  let P := (C (a : ℚ) - C (b : ℚ) * X) ^ n
+
+  rcases lt_or_eq_of_le hk with h_lt | h_eq
+  · use 0
+    rw [coeff_mul]
+    rw [sum_eq_zero]
+    · simp
+    · intro x hx
+      simp only [mem_antidiagonal] at hx
+      rw [coeff_X_pow]
+      split_ifs with h_i
+      · rw [h_i] at hx
+        have h_contra : n ≤ k := by
+          rw [← hx]
+          exact Nat.le_add_right n x.2
+        exact (not_le_of_gt h_lt h_contra).elim
+      · simp
+
+  · rw [h_eq]
+    rw [Nat.descFactorial_self]
+
+    rw [coeff_mul]
+
+    have h_sum : ∑ x ∈ antidiagonal n, (X ^ n).coeff x.1 * P.coeff x.2
+                 = (X^n).coeff n * P.coeff 0 := by
+      apply sum_eq_single (n, 0)
+      · rintro ⟨i, j⟩ h_mem h_ne
+        simp only [mem_antidiagonal] at h_mem
+        rw [coeff_X_pow]
+        split_ifs with h_i
+        · subst h_i
+          have h_j_zero : j = 0 := by
+            exact Nat.left_eq_add.mp (id (Eq.symm h_mem))
+          subst h_j_zero
+          contradiction
+        · exact Rat.zero_mul (P.coeff (i, j).2)
+      · simp
+    rw [h_sum]
+    rw [coeff_X_pow_self, one_mul, coeff_zero_eq_eval_zero]
+    simp only [P, eval_pow, eval_sub, eval_mul, eval_C, eval_X, mul_zero, sub_zero]
+    use a ^ n
+    simp only [nsmul_eq_mul]
+
+    have h_fact_ne_zero : (n.factorial : ℚ) ≠ 0 :=
+      Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero n)
+
+    field_simp [h_fact_ne_zero]
+    norm_cast
+
+
+  done
+
+
+-- statement by Kitty
+-- proof by Ben
 lemma f_derivs_integral_at_pi (n k : ℕ) (a b : ℤ) (hn : n > 0) (hb : b ≠ 0) (hk : k ≤ n):
 ∃ z : ℤ, (derivative^[k] (f n a b)).eval (a / b : ℚ) = (z : ℚ) := by
 
@@ -167,6 +243,9 @@ lemma f_derivs_integral_at_pi (n k : ℕ) (a b : ℤ) (hn : n > 0) (hb : b ≠ 0
   simp
   done
 
+-- Statement originally by Tristan
+-- Statement changed by Ben
+-- Proof by Ben
 lemma f_times_sin_greater_than_zero (x : ℝ) (n : ℕ) (a b : ℚ) (hb : b > 0) (h : Real.pi = a / b)
 (hxl : 0 < x) (hxu : x < Real.pi) :
 0 < ((Polynomial.map (algebraMap ℚ ℝ) (f n a b)).eval x * Real.sin x) := by
@@ -192,7 +271,11 @@ lemma f_times_sin_greater_than_zero (x : ℝ) (n : ℕ) (a b : ℚ) (hb : b > 0)
     exact h_ineq
   exact mul_pos h2 h1
   done
--- In the following we assume pi = a/b when we say x < a/b
+
+-- In the following we assume pi = a/b
+-- Statement by Tristan
+-- Statement changed by Ben
+-- Proof by Ben
 lemma f_times_sin_less_than_bound (x : ℝ) (n : ℕ) (a b : ℚ)
 (hxl : 0 < x) (hxu : x < Real.pi) (hn : n ≠ 0) (ha : a ≥ 0) (hb : b > 0) (h : Real.pi = a / b):
 ((Polynomial.map (algebraMap ℚ ℝ) (f n a b)).eval x * Real.sin x)
@@ -276,12 +359,14 @@ lemma f_times_sin_less_than_bound (x : ℝ) (n : ℕ) (a b : ℚ)
   done
 
 -- Defining the definite integral of f(x) * sin(x) from 0 to pi
+-- Statement by Tristan
 noncomputable def definite_integral_f_sin (n : ℕ) (a b : ℚ) : ℝ :=
   ∫ x in 0..Real.pi, (Polynomial.map (algebraMap ℚ ℝ) (f n a b)).eval x * Real.sin x
 
 -- Lemma to show integral above = F(pi) + F(0)
+-- Statement by Tristan
 lemma f_sin_integral_equals_F_eval_pi_plus_F_eval_0 (n : ℕ) (a b : ℤ) :
   definite_integral_f_sin n (a : ℚ) (b : ℚ) =
   (Polynomial.map (algebraMap ℚ ℝ) (F n a b)).eval Real.pi +
   (Polynomial.map (algebraMap ℚ ℝ) (F n a b)).eval 0 := by
-    sorry
+sorry
