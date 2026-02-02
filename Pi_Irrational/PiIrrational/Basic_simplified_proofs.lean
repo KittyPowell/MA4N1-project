@@ -365,8 +365,33 @@ noncomputable def definite_integral_f_sin (n : ℕ) (a b : ℚ) : ℝ :=
 
 -- Lemma to show integral above = F(pi) + F(0)
 -- Statement by Tristan
-lemma f_sin_integral_equals_F_eval_pi_plus_F_eval_0 (n : ℕ) (a b : ℤ) :
+
+lemma f_sin_integral_equals_F_eval_pi_plus_F_eval_0 (n : ℕ) (a b : ℤ)(hb : b> 0 ) :
   definite_integral_f_sin n (a : ℚ) (b : ℚ) =
   (Polynomial.map (algebraMap ℚ ℝ) (F n a b)).eval Real.pi +
   (Polynomial.map (algebraMap ℚ ℝ) (F n a b)).eval 0 := by
+  rw[F,f, definite_integral_f_sin]
+  simp
+  field_simp
+  rw [← sum_add_distrib]
+  simp_rw [← add_div, ← mul_add]
+  sorry
+
+lemma f_sin_integral_equals_F_eval_pi_plus_F_eval_0_1 (n : ℕ) (a b : ℤ)(hb : b> 0 ) :
+  definite_integral_f_sin n (a : ℚ) (b : ℚ) =
+  (Polynomial.map (algebraMap ℚ ℝ) (F n a b)).eval Real.pi +
+  (Polynomial.map (algebraMap ℚ ℝ) (F n a b)).eval 0 := by
+  have F_product_rule:
+
+sorry
+
+
+-- setting up the main contradiction
+-- Stetement up to push_neg by Kitty
+theorem pi_irrational (x : ℝ) (n : ℕ) (a b : ℚ) (hb : b > 0)(hxl : 0 < x) (hxu : x < Real.pi):
+Irrational π := by
+rw [irrational_iff_ne_rational]
+by_contra h_rational
+push_neg at h_rational
+-- will need to use the bounds and the integral lemmas
 sorry
