@@ -142,86 +142,63 @@ lemma f_integral_at_pi (n : ℕ) (a b : ℚ) (hb : b ≠ 0) (hn : n ≠ 0) : ∃
   exact eval_f_at_aoverb_is_0 n a b hb hn
   done
 
-lemma f_derivs_integral_at_zero (n k : ℕ) (a b : ℤ) (hn : n > 0) (hk : k ≤ n) :
+lemma f_derivs_integral_at_zero (n k : ℕ) (a b : ℤ) :
   ∃ z : ℤ, (derivative^[k] (f n a b)).eval 0 = (z : ℚ) := by
-  rw [← coeff_zero_eq_eval_zero, coeff_iterate_derivative]
-  rw [f]
 
+  rw [← coeff_zero_eq_eval_zero, coeff_iterate_derivative]
+
+  rw [zero_add]
+
+
+  rw [f]
   rw [coeff_C_mul]
 
 
-  simp only [zero_add]
-  let P := (C (a : ℚ) - C (b : ℚ) * X) ^ n
+  let P : Polynomial ℤ := X^n * (C a - C b * X)^n
 
-  rcases lt_or_eq_of_le hk with h_lt | h_eq
-  · use 0
-    rw [coeff_mul]
-    rw [sum_eq_zero]
-    · simp
-    · intro x hx
-      simp only [mem_antidiagonal] at hx
-      rw [coeff_X_pow]
-      split_ifs with h_i
-      · rw [h_i] at hx
-        have h_contra : n ≤ k := by
-          rw [← hx]
-          exact Nat.le_add_right n x.2
-        exact (not_le_of_gt h_lt h_contra).elim
-      · simp
+  have h_map : P.map (algebraMap ℤ ℚ) = X^n * (C (a:ℚ) - C (b:ℚ) * X)^n := by
+    simp [P, Polynomial.map_pow, Polynomial.map_mul, Polynomial.map_sub]
 
-  · rw [h_eq]
+
+  rw [← h_map, Polynomial.coeff_map]
+
+  by_cases h_lt : k < n
+  · have h_coeff_0 : P.coeff k = 0 := by
+      rw [coeff_X_pow_mul']
+      simp [h_lt]
+    rw [h_coeff_0]
+    simp
+    use 0
+    simp
+  · push_neg at h_lt
+    use (k.factorial / n.factorial : ℕ) * P.coeff k
+
+    simp
+    have h_fact_div : (n.factorial : ℚ) ∣ (k.factorial : ℚ) := by
+      refine Nat.cast_dvd_cast ?_
+      exact_mod_cast Nat.factorial_dvd_factorial h_lt
+
+
+    simp [← mul_assoc]
+    left
+    refine (mul_inv_eq_iff_eq_mul₀ ?_).mpr ?_
+    · refine Nat.cast_ne_zero.mpr ?_
+      exact Nat.factorial_ne_zero n
     rw [Nat.descFactorial_self]
-
-    rw [coeff_mul]
-
-    have h_sum : ∑ x ∈ antidiagonal n, (X ^ n).coeff x.1 * P.coeff x.2
-                 = (X^n).coeff n * P.coeff 0 := by
-      apply sum_eq_single (n, 0)
-      · rintro ⟨i, j⟩ h_mem h_ne
-        simp only [mem_antidiagonal] at h_mem
-        rw [coeff_X_pow]
-        split_ifs with h_i
-        · subst h_i
-          have h_j_zero : j = 0 := by
-            exact Nat.left_eq_add.mp (id (Eq.symm h_mem))
-          subst h_j_zero
-          contradiction
-        · exact Rat.zero_mul (P.coeff (i, j).2)
-      · simp
-    rw [h_sum]
-    rw [coeff_X_pow_self, one_mul, coeff_zero_eq_eval_zero]
-    simp only [P, eval_pow, eval_sub, eval_mul, eval_C, eval_X, mul_zero, sub_zero]
-    use a ^ n
-    simp only [nsmul_eq_mul]
-
-    have h_fact_ne_zero : (n.factorial : ℚ) ≠ 0 :=
-      Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero n)
-
-    field_simp [h_fact_ne_zero]
     norm_cast
+    rw [Nat.div_mul_cancel (Nat.factorial_dvd_factorial h_lt)]
 
 
-  done
-
-
-lemma f_derivs_integral_at_pi (n k : ℕ) (a b : ℤ) (hn : n > 0) (hb : b ≠ 0) (hk : k ≤ n):
+lemma f_derivs_integral_at_pi (n k : ℕ) (a b : ℤ) (hb : b ≠ 0) :
 ∃ z : ℤ, (derivative^[k] (f n a b)).eval (a / b : ℚ) = (z : ℚ) := by
-
   have hbQ : (b : ℚ) ≠ 0 := by
     exact_mod_cast hb
   rw [symmetry_of_f_derivs n k a b hbQ]
-  obtain ⟨z, hz⟩ := f_derivs_integral_at_zero n k a b hn hk
+  obtain ⟨z, hz⟩ := f_derivs_integral_at_zero n k a b
   simp [hz]
   use (-1)^k * z
   simp
   done
-
-lemma f_derivs_integral_at_zero_FIXED (n k : ℕ) (a b : ℤ) (hn : n > 0) (hk : k ≤ 2*n) : ∃ z : ℤ, (derivative^[k] (f n a b)).eval 0 = (z : ℚ) := by
-  sorry
-
-lemma f_derivs_integral_at_pi_FIXED (n k : ℕ) (a b : ℤ) (hn : n > 0) (hb : b ≠ 0) (hk : k ≤ 2*n):
-∃ z : ℤ, (derivative^[k] (f n a b)).eval (a / b : ℚ) = (z : ℚ) := by
-  sorry
 
 lemma F_zero_integer (n : ℕ) (a b : ℤ) (hn : n > 0) :
   ∃ z : ℤ, (F n a b).eval 0 = z := by
@@ -234,7 +211,7 @@ lemma F_zero_integer (n : ℕ) (a b : ℤ) (hn : n > 0) :
     rw [Finset.sum_insert hk]
     rw [Polynomial.eval_mul, Polynomial.eval_pow, Polynomial.eval_C]
     by_cases h2k : 2 * k ≤ n
-    · obtain ⟨z_k, hz_k⟩ := f_derivs_integral_at_zero n (2 * k) a b hn h2k
+    · obtain ⟨z_k, hz_k⟩ := f_derivs_integral_at_zero n (2 * k) a b
       use z_s + (-1 : ℤ) ^ k * z_k
       rw [hz_s, hz_k]
       simp
@@ -248,7 +225,7 @@ lemma F_zero_integer (n : ℕ) (a b : ℤ) (hn : n > 0) :
 
 lemma F_pi_integer (n : ℕ) (a b : ℤ) (hn : n > 0) :
   ∃ z : ℤ, (F n a b).eval π = z := by
-  sorry 
+  sorry
 
 
 
