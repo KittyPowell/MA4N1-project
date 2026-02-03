@@ -385,6 +385,7 @@ lemma f_sin_integral_equals_F_eval_pi_plus_F_eval_0_1 (n : ℕ) (a b : ℤ)(hb :
 
 sorry
 
+-- Theorem that pi is irrational
 theorem pi_irrational {π : ℝ} (x : ℝ) (n : ℕ)
 (a b : ℚ) (hb : b > 0) (hxl : 0 < x) (hxu : x < Real.pi):
 Irrational π := by
