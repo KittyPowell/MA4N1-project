@@ -326,6 +326,45 @@ lemma f_times_sin_less_than_bound (x : ℝ) (n : ℕ) (a b : ℚ)
 noncomputable def definite_integral_f_sin (n : ℕ) (a b : ℚ) : ℝ :=
   ∫ x in 0..Real.pi, (Polynomial.map (algebraMap ℚ ℝ) (f n a b)).eval x * Real.sin x
 
+lemma F_telescope: (F n a b) + derivative (derivative (F n a b)) = (f n a b) := by
+    unfold F
+    simp_rw [derivative_sum, derivative_mul]
+    rw [sum_range_succ_comm] 
+    rw [sum_range_succ']    
+    simp only [pow_zero, one_mul]
+    simp only [add_assoc, add_comm, add_left_comm]
+    rw [← sum_add_distrib]  
+    have h_cancel : ∑ k ∈ range n, (C (-1 : ℚ) ^ (k + 1) * derivative^[2 * k + 2] (f n a b) + C (-1 : ℚ) ^ k * derivative^[2 * k + 2] (f n a b)) = 0 := by
+      apply sum_eq_zero
+      intro k _
+      rw [← add_mul, pow_succ]
+      ring_nf
+      simp
+    sorry
+
+
+
+lemma F_trig_product_rule (n : ℕ) (a b : ℤ) :
+    ∀ x : ℝ, deriv (fun x => (Polynomial.map (algebraMap ℚ ℝ) (derivative (F n a b))).eval x * Real.sin x - 
+                             (Polynomial.map (algebraMap ℚ ℝ) (F n a b)).eval x * Real.cos x) x = 
+             (Polynomial.map (algebraMap ℚ ℝ) (f n a b)).eval x * Real.sin x := by
+  intro x
+  let f_R := (f n a b).map (algebraMap ℚ ℝ)
+  let F_R := (F n a b).map (algebraMap ℚ ℝ)
+  let F'_R := (derivative (F n a b)).map (algebraMap ℚ ℝ)
+  let F''_R := (derivative (derivative (F n a b))).map (algebraMap ℚ ℝ)
+  rw [show (fun x => F'_R.eval x * Real.sin x - F_R.eval x * Real.cos x) = 
+           (fun x => F'_R.eval x * Real.sin x) - (fun x => F_R.eval x * Real.cos x) by rfl]
+  rw [deriv_sub]
+  rw [show (fun x => F'_R.eval x * Real.sin x) = (fun x => F'_R.eval x) * Real.sin by rfl]
+  rw [deriv_mul]
+  rw [show (fun x => F_R.eval x * Real.cos x) = (fun x => F_R.eval x) * Real.cos by rfl]
+  rw [deriv_mul]
+  rw [Real.deriv_sin, Real.deriv_cos]
+  simp only [eval_map]
+  ring_nf
+  sorry
+
 
 lemma f_sin_integral_equals_F_eval_pi_plus_F_eval_0 (n : ℕ) (a b : ℤ)(hb : b> 0 ) :
   definite_integral_f_sin n (a : ℚ) (b : ℚ) =
