@@ -326,7 +326,7 @@ lemma f_times_sin_less_than_bound (x : ℝ) (n : ℕ) (a b : ℚ)
 noncomputable def definite_integral_f_sin (n : ℕ) (a b : ℚ) : ℝ :=
   ∫ x in 0..Real.pi, (Polynomial.map (algebraMap ℚ ℝ) (f n a b)).eval x * Real.sin x
 
-lemma F_telescope: (F n a b) + derivative (derivative (F n a b)) = (f n a b) := by
+lemma F_telescope (x : ℝ) (n : ℕ) (hn : n ≠ 0) (ha : a ≥ 0) (hb : b > 0) : (F n a b) + derivative (derivative (F n a b)) = (f n a b) := by
     unfold F
     simp_rw [derivative_sum, derivative_mul]
     rw [sum_range_succ_comm] 
@@ -340,8 +340,25 @@ lemma F_telescope: (F n a b) + derivative (derivative (F n a b)) = (f n a b) := 
       rw [← add_mul, pow_succ]
       ring_nf
       simp
-    sorry
-
+    have h_high_deriv : derivative^[2 * n + 2] (f n a b) = 0 := by
+      ext k
+      rw [coeff_zero]
+      apply coeff_eq_zero_of_natDegree_lt
+      have h_deg_f : natDegree (f n a b) ≤ 2 * n := by
+        rw [f]
+        refine (natDegree_C_mul_le _ _).trans ?_
+        refine natDegree_le_iff_degree_le.mpr ?_
+        simp only [degree_mul, degree_pow]
+        have h_lin : (C (a : ℚ) - C (b : ℚ) * X).degree ≤ 1 := by
+          rw [sub_eq_add_neg, neg_mul_eq_neg_mul]
+          refine (degree_add_le _ _).trans ?_
+          simp only [ degree_neg, degree_mul, degree_X]
+          rw [max_le_iff]
+          constructor
+          · apply le_trans (degree_C_le : (C (a : ℚ)).degree ≤ 0)
+            exact (by decide : (0 : WithBot ℕ) ≤ 1)
+          · have h_deg : (C (b : ℚ)).degree ≤ 0 := degree_C_le
+            convert add_le_add (degree_C_le : (C (b : ℚ)).degree ≤ 0) (le_refl (1 : WithBot ℕ))
 
 
 lemma F_trig_product_rule (n : ℕ) (a b : ℤ) :
