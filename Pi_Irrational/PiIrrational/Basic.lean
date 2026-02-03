@@ -216,6 +216,13 @@ lemma f_derivs_integral_at_pi (n k : ℕ) (a b : ℤ) (hn : n > 0) (hb : b ≠ 0
   simp
   done
 
+lemma f_derivs_integral_at_zero_FIXED (n k : ℕ) (a b : ℤ) (hn : n > 0) (hk : k ≤ 2*n) : ∃ z : ℤ, (derivative^[k] (f n a b)).eval 0 = (z : ℚ) := by
+  sorry
+
+lemma f_derivs_integral_at_pi_FIXED (n k : ℕ) (a b : ℤ) (hn : n > 0) (hb : b ≠ 0) (hk : k ≤ 2*n):
+∃ z : ℤ, (derivative^[k] (f n a b)).eval (a / b : ℚ) = (z : ℚ) := by
+  sorry
+
 lemma f_times_sin_greater_than_zero (x : ℝ) (n : ℕ) (a b : ℚ) (hb : b > 0) (h : Real.pi = a / b)
 (hxl : 0 < x) (hxu : x < Real.pi) :
 0 < ((Polynomial.map (algebraMap ℚ ℝ) (f n a b)).eval x * Real.sin x) := by
@@ -329,11 +336,11 @@ noncomputable def definite_integral_f_sin (n : ℕ) (a b : ℚ) : ℝ :=
 lemma F_telescope (x : ℝ) (n : ℕ) (hn : n ≠ 0) (ha : a ≥ 0) (hb : b > 0) : (F n a b) + derivative (derivative (F n a b)) = (f n a b) := by
     unfold F
     simp_rw [derivative_sum, derivative_mul]
-    rw [sum_range_succ_comm] 
-    rw [sum_range_succ']    
+    rw [sum_range_succ_comm]
+    rw [sum_range_succ']
     simp only [pow_zero, one_mul]
     simp only [add_assoc, add_comm, add_left_comm]
-    rw [← sum_add_distrib]  
+    rw [← sum_add_distrib]
     have h_cancel : ∑ k ∈ range n, (C (-1 : ℚ) ^ (k + 1) * derivative^[2 * k + 2] (f n a b) + C (-1 : ℚ) ^ k * derivative^[2 * k + 2] (f n a b)) = 0 := by
       apply sum_eq_zero
       intro k _
@@ -372,19 +379,19 @@ lemma F_telescope (x : ℝ) (n : ℕ) (hn : n ≠ 0) (ha : a ≥ 0) (hb : b > 0)
       apply coeff_eq_zero_of_natDegree_lt
       rw[f]
       sorry
-      
+
     sorry
 
 lemma F_trig_product_rule (n : ℕ) (a b : ℤ) :
-    ∀ x : ℝ, deriv (fun x => (Polynomial.map (algebraMap ℚ ℝ) (derivative (F n a b))).eval x * Real.sin x - 
-                             (Polynomial.map (algebraMap ℚ ℝ) (F n a b)).eval x * Real.cos x) x = 
+    ∀ x : ℝ, deriv (fun x => (Polynomial.map (algebraMap ℚ ℝ) (derivative (F n a b))).eval x * Real.sin x -
+                             (Polynomial.map (algebraMap ℚ ℝ) (F n a b)).eval x * Real.cos x) x =
              (Polynomial.map (algebraMap ℚ ℝ) (f n a b)).eval x * Real.sin x := by
   intro x
   let f_R := (f n a b).map (algebraMap ℚ ℝ)
   let F_R := (F n a b).map (algebraMap ℚ ℝ)
   let F'_R := (derivative (F n a b)).map (algebraMap ℚ ℝ)
   let F''_R := (derivative (derivative (F n a b))).map (algebraMap ℚ ℝ)
-  rw [show (fun x => F'_R.eval x * Real.sin x - F_R.eval x * Real.cos x) = 
+  rw [show (fun x => F'_R.eval x * Real.sin x - F_R.eval x * Real.cos x) =
            (fun x => F'_R.eval x * Real.sin x) - (fun x => F_R.eval x * Real.cos x) by rfl]
   rw [deriv_sub]
   rw [show (fun x => F'_R.eval x * Real.sin x) = (fun x => F'_R.eval x) * Real.sin by rfl]
