@@ -340,16 +340,8 @@ lemma F_telescope (x : ℝ) (n : ℕ) (hn : n ≠ 0) (ha : a ≥ 0) (hb : b > 0)
       rw [← add_mul, pow_succ]
       ring_nf
       simp
-    have h_high_deriv : derivative^[2 * n + 2] (f n a b) = 0 := by
-      ext k
-      rw [coeff_zero]
-      apply coeff_eq_zero_of_natDegree_lt
-      have h_deg_f : natDegree (f n a b) ≤ 2 * n := by
-        rw [f]
-        refine (natDegree_C_mul_le _ _).trans ?_
-        refine natDegree_le_iff_degree_le.mpr ?_
-        simp only [degree_mul, degree_pow]
-        have h_lin : (C (a : ℚ) - C (b : ℚ) * X).degree ≤ 1 := by
+
+    have h_lin : (C (a : ℚ) - C (b : ℚ) * X).degree ≤ 1 := by
           rw [sub_eq_add_neg, neg_mul_eq_neg_mul]
           refine (degree_add_le _ _).trans ?_
           simp only [ degree_neg, degree_mul, degree_X]
@@ -360,6 +352,28 @@ lemma F_telescope (x : ℝ) (n : ℕ) (hn : n ≠ 0) (ha : a ≥ 0) (hb : b > 0)
           · have h_deg : (C (b : ℚ)).degree ≤ 0 := degree_C_le
             convert add_le_add (degree_C_le : (C (b : ℚ)).degree ≤ 0) (le_refl (1 : WithBot ℕ))
 
+    have h_deg_f : natDegree (f n a b) ≤ 2 * n := by
+        rw [f]
+        refine (natDegree_C_mul_le _ _).trans ?_
+        refine natDegree_le_iff_degree_le.mpr ?_
+        simp only [degree_mul, degree_pow]
+        rw [degree_X]
+        rw [two_mul, Nat.cast_add]
+        apply add_le_add
+        · simp only [nsmul_one, le_refl]
+        · calc n • (C (a : ℚ) - C (b : ℚ) * X).degree
+            ≤ n • (1 : WithBot ℕ) := nsmul_le_nsmul_right h_lin n
+          _ = ↑n := by simp
+
+
+    have h_high_deriv : derivative^[2 * n + 2] (f n a b) = 0 := by
+      ext k
+      rw [coeff_zero]
+      apply coeff_eq_zero_of_natDegree_lt
+      rw[f]
+      sorry
+      
+    sorry
 
 lemma F_trig_product_rule (n : ℕ) (a b : ℤ) :
     ∀ x : ℝ, deriv (fun x => (Polynomial.map (algebraMap ℚ ℝ) (derivative (F n a b))).eval x * Real.sin x - 
