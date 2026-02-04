@@ -439,24 +439,27 @@ lemma F_trig_product_rule (n : ℕ) (a b : ℕ) (hn : n > 0) (ha : a ≥ 0) (hb 
   rw [F_telescope a b n hn ha hb]
 
 
-lemma f_sin_integral_equals_F_eval_pi_plus_F_eval_0 (n : ℕ) (a b : ℤ)(hb : b> 0 ) :
+lemma f_sin_integral_equals_F_eval_pi_plus_F_eval_0(n : ℕ) (a b : ℕ)(hn : n > 0) (ha : a ≥ 0)(hb : b> 0 ) :
   definite_integral_f_sin n (a : ℚ) (b : ℚ) =
   (Polynomial.map (algebraMap ℚ ℝ) (F n a b)).eval Real.pi +
   (Polynomial.map (algebraMap ℚ ℝ) (F n a b)).eval 0 := by
-  rw[F,f, definite_integral_f_sin]
-  simp
-  field_simp
-  rw [← sum_add_distrib]
-  simp_rw [← add_div, ← mul_add]
-  sorry
+  simp[definite_integral_f_sin]
+  simp_rw [Polynomial.aeval_def]
+  simp_rw [Polynomial.eval₂_eq_eval_map]
+  simp_rw [← F_trig_product_rule n a b hn ha hb]
+  rw [intervalIntegral.integral_deriv_eq_sub]
+  · simp [Real.sin_pi, Real.cos_pi, Real.sin_zero, Real.cos_zero]
+  · intro x _
+    fun_prop
+  · let g := fun x => eval x (Polynomial.map (algebraMap ℚ ℝ) (f n a b)) * Real.sin x
+    have hg : IntervalIntegrable g MeasureTheory.volume 0 Real.pi := by
+      apply Continuous.intervalIntegrable
+      exact (Polynomial.continuous _).mul Real.continuous_sin
+    convert hg using 1
+    ext x
+    dsimp [g]
+    exact (F_trig_product_rule n a b hn ha hb x)
 
-lemma f_sin_integral_equals_F_eval_pi_plus_F_eval_0_1 (n : ℕ) (a b : ℤ)(hb : b> 0 ) :
-  definite_integral_f_sin n (a : ℚ) (b : ℚ) =
-  (Polynomial.map (algebraMap ℚ ℝ) (F n a b)).eval Real.pi +
-  (Polynomial.map (algebraMap ℚ ℝ) (F n a b)).eval 0 := by
-  have F_product_rule:
-
-sorry
 
 -- Theorem that pi is irrational
 theorem pi_irrational : Irrational Real.pi := by
