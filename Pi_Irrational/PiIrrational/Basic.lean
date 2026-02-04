@@ -104,14 +104,11 @@ lemma symmetry_of_f_derivs (n k : ℕ) (a b : ℚ) (hb : b ≠ 0) :
         exact derivative_negOne_pow k
 
       have ih_simplified :
-          (derivative^[Nat.succ k] (f n a b))
-            =
-          (C (-1 : ℚ))^k *
-            ((derivative^[Nat.succ k] (f n a b)).comp q) * (C (-1 : ℚ)) := by
+      (derivative^[Nat.succ k] (f n a b)) = (C (-1 : ℚ))^k *
+      ((derivative^[Nat.succ k] (f n a b)).comp q) * (C (-1 : ℚ)) := by
         simpa [Function.iterate_succ_apply', q, hqder,
               derivative_mul, derivative_comp, hconst',
               mul_assoc, mul_left_comm, mul_comm] using ih'
-
       calc
         (derivative^[Nat.succ k] (f n a b))
             =
@@ -406,7 +403,7 @@ lemma F_telescope (a b : ℕ) (n : ℕ) (hn : n > 0) (ha : a ≥ 0) (hb : b > 0)
 
     sorry
 
-lemma F_trig_product_rule (n : ℕ) (a b : ℕ) (x : ℝ) (hn : n > 0) (ha : a ≥ 0) (hb : b > 0) :
+lemma F_trig_product_rule (n : ℕ) (a b : ℕ) (hn : n > 0) (ha : a ≥ 0) (hb : b > 0) :
   ∀ x : ℝ, deriv (fun x => (Polynomial.map (algebraMap ℚ ℝ)
   (derivative (F n a b))).eval x * Real.sin x -
   (Polynomial.map (algebraMap ℚ ℝ) (F n a b)).eval x * Real.cos x) x =
@@ -462,10 +459,75 @@ lemma f_sin_integral_equals_F_eval_pi_plus_F_eval_0_1 (n : ℕ) (a b : ℤ)(hb :
 sorry
 
 -- Theorem that pi is irrational
-theorem pi_irrational {π : ℝ} (x : ℝ) (n : ℕ)
+theorem pi_irrational1 {π : ℝ} (x : ℝ) (n : ℕ)
 (a b : ℚ) (hb : b > 0) (hxl : 0 < x) (hxu : x < Real.pi):
 Irrational π := by
   rw [irrational_iff_ne_rational]
   by_contra h_rational
   push_neg at h_rational
   sorry
+
+theorem pi_irrational : Irrational Real.pi := by
+  rw [irrational_iff_ne_rational]
+  intro a_frac b_frac h_frac_pos h_pi_eq
+  have : ∃ (a b : ℕ), b ≠ 0 ∧ Real.pi = a / b := by
+    use a_frac.natAbs, b_frac.natAbs
+    constructor
+    · simp
+      exact h_frac_pos
+    · simp
+      rw [← abs_div, ← h_pi_eq, abs_of_nonneg Real.pi_pos.le]
+
+  rcases this with ⟨a, b, hb_ne, h_pi_ab⟩
+  have hb_pos : (0 : ℝ) < b := Nat.cast_pos.mpr (Nat.pos_of_ne_zero hb_ne)
+  have ha_pos : (0 : ℝ) < a := by
+    rw [← div_pos_iff_of_pos_right hb_pos, ← h_pi_ab]
+    exact Real.pi_pos
+
+  let I := fun n =>
+  ∫ x in 0..Real.pi, (Polynomial.map (algebraMap ℚ ℝ) (f n a b)).eval x * Real.sin x
+
+  have I_is_int : ∀ n, ∃ z : ℤ, I n = z := by
+    intro n
+    simp [I]
+
+
+    have F0 : ∃ z : ℤ, (F n a b).eval 0 = z := by
+      exact F_zero_integer n ↑a ↑b
+    have Fpi : ∃ z : ℤ, (F n a b).eval (a / b : ℚ) = z := by
+      exact F_pi_integer n (↑a) (↑b) (by exact_mod_cast hb_ne)
+
+
+    obtain ⟨z1, hz1⟩ := F0
+    obtain ⟨z2, hz2⟩ := Fpi
+    use z1 + z2
+    push_cast
+    sorry -- I am unsure why rw [← hz1] fails here.
+
+  have I_pos : ∀ n, 0 < I n := by
+    intro n
+    simp [I]
+    sorry
+
+  have I_lim : Filter.Tendsto I Filter.atTop (nhds 0) := by
+
+    sorry
+
+  rw [Metric.tendsto_atTop] at I_lim
+  specialize I_lim 1 zero_lt_one
+  rcases I_lim with ⟨n, hn⟩
+
+  specialize hn n (le_refl n)
+  rw [dist_zero_right, Real.norm_eq_abs] at hn
+
+  rw [abs_of_pos (I_pos n)] at hn
+  rcases I_is_int n with ⟨z, hz⟩
+
+  simp [hz] at hn I_pos
+  norm_cast at hn
+  specialize I_pos n
+  norm_cast at I_pos
+
+  rw [hz] at I_pos
+  norm_cast at I_pos
+  linarith
