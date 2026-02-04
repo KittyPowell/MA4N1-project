@@ -200,40 +200,46 @@ lemma f_derivs_integral_at_pi (n k : ℕ) (a b : ℤ) (hb : b ≠ 0) :
   simp
   done
 
-lemma F_zero_integer (n : ℕ) (a b : ℤ) (hn : n > 0) :
+lemma F_zero_integer (n : ℕ) (a b : ℤ) :
   ∃ z : ℤ, (F n a b).eval 0 = z := by
   unfold F
+  choose g hg using fun k => f_derivs_integral_at_zero n (2 * k) a b
+
+  use ∑ k ∈ Finset.range (n + 1), (-1)^k * g k
   rw [Polynomial.eval_finset_sum]
-  induction' Finset.range (n + 1) using Finset.induction_on with k s hk ih
-  · use 0
-    simp
-  · obtain ⟨z_s, hz_s⟩ := ih
-    rw [Finset.sum_insert hk]
-    rw [Polynomial.eval_mul, Polynomial.eval_pow, Polynomial.eval_C]
-    by_cases h2k : 2 * k ≤ n
-    · obtain ⟨z_k, hz_k⟩ := f_derivs_integral_at_zero n (2 * k) a b
-      use z_s + (-1 : ℤ) ^ k * z_k
-      rw [hz_s, hz_k]
-      simp
-      ring
-    · use z_s
-      rw [hz_s]
-      have : (derivative^[2 * k] (f n a b)).eval 0 = 0 := by sorry
-      rw [this]
-      simp
+  norm_cast
+
+  simp
+  apply Finset.sum_congr rfl
+  intro k _
+  simp
+  rw [hg]
+  done
+
+lemma F_pi_integer (n : ℕ) (a b : ℤ) (hb : b ≠ 0) :
+  ∃ z : ℤ, (F n a b).eval (a / b : ℚ) = z := by
+  unfold F
+
+  choose g hg using fun k => f_derivs_integral_at_pi n (2 * k) a b hb
+
+  use ∑ k ∈ Finset.range (n + 1), (-1)^k * g k
+  rw [Polynomial.eval_finset_sum]
+  simp
+  apply Finset.sum_congr rfl
+  intro k _
+  simp
+  exact hg k
+
+  done
 
 
-lemma F_pi_integer (n : ℕ) (a b : ℤ) (hn : n > 0) :
-  ∃ z : ℤ, (F n a b).eval π = z := by
-  sorry
 
-
-
-lemma F_zero_plus_F_pi_integer (n : ℕ) (a b : ℤ) (hn : n > 0):
-  ∃ z : ℤ, (F n a b).eval 0 + (F n a b).eval π = z := by
-  obtain ⟨z1, hz1⟩ := F_zero_integer n a b hn
-  obtain ⟨z2, hz2⟩ := F_pi_integer n a b hn
+lemma F_zero_plus_F_pi_integer (n : ℕ) (a b : ℤ) (hb : b ≠ 0) :
+  ∃ z : ℤ, (F n a b).eval 0 + (F n a b).eval (a / b : ℚ) = z := by
+  obtain ⟨z1, hz1⟩ := F_zero_integer n a b
+  obtain ⟨z2, hz2⟩ := F_pi_integer n a b hb
   use z1 + z2
+
   rw [hz1, hz2]
   simp
 
