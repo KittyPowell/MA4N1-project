@@ -44,7 +44,7 @@ lemma symmetry_of_f (x : ℚ) (n : ℕ) (a b : ℚ) (hb : b ≠ 0) :
   field_simp
   done
 
-lemma symmetry_of_f_uniform (n : ℕ) (a b : ℚ) (hb : b ≠ 0) (hn: n>0) :
+lemma symmetry_of_f_uniform (n : ℕ) (a b : ℚ) (hb : b ≠ 0):
 (f n a b) = (f n a b).comp (C (a / b) - X) := by
   rw [f]
   simp
@@ -136,11 +136,11 @@ lemma f_integral_at_0 (n : ℕ) (a b : ℚ) (hn : n ≠ 0) : ∃ z : ℤ,
   exact eval_f_at_zero_is_0 n a b hn
   done
 
-lemma f_integral_at_pi (n : ℕ) (a b : ℚ) (hb : b ≠ 0) (hn : n ≠ 0) : ∃ z : ℤ,
-(f n a b).eval (a / b) = 0 := by
-  use 0
+
+lemma f_integral_at_pi (n : ℕ) (a b : ℚ) (hb : b ≠ 0) (hn : n ≠ 0) :
+    (f n a b).eval (a / b) = 0 := by
   exact eval_f_at_aoverb_is_0 n a b hb hn
-  done
+
 
 lemma f_derivs_integral_at_zero (n k : ℕ) (a b : ℤ) :
   ∃ z : ℤ, (derivative^[k] (f n a b)).eval 0 = (z : ℚ) := by
@@ -455,3 +455,4 @@ Irrational π := by
   by_contra h_rational
   push_neg at h_rational
   sorry
+
