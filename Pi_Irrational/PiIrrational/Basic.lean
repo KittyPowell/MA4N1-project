@@ -357,7 +357,7 @@ lemma f_times_sin_less_than_bound (x : ℝ) (n : ℕ) (a b : ℚ)
 noncomputable def definite_integral_f_sin (n : ℕ) (a b : ℚ) : ℝ :=
   ∫ x in 0..Real.pi, (Polynomial.map (algebraMap ℚ ℝ) (f n a b)).eval x * Real.sin x
 
-lemma F_telescope (x : ℝ) (n : ℕ) (hn : n ≠ 0) (ha : a ≥ 0) (hb : b > 0) : (F n a b) + derivative (derivative (F n a b)) = (f n a b) := by
+lemma F_telescope (a b : ℕ) (n : ℕ) (hn : n > 0) (ha : a ≥ 0) (hb : b > 0) : (F n a b) + derivative (derivative (F n a b)) = (f n a b) := by
     unfold F
     simp_rw [derivative_sum, derivative_mul]
     rw [sum_range_succ_comm]
@@ -406,10 +406,12 @@ lemma F_telescope (x : ℝ) (n : ℕ) (hn : n ≠ 0) (ha : a ≥ 0) (hb : b > 0)
 
     sorry
 
-lemma F_trig_product_rule (n : ℕ) (a b : ℤ) (x : ℝ) (hn : n > 0) (ha : a ≥ 0) (hb : b > 0) :
-    ∀ x : ℝ, deriv (fun x => (Polynomial.map (algebraMap ℚ ℝ) (derivative (F n a b))).eval x * Real.sin x -
-                             (Polynomial.map (algebraMap ℚ ℝ) (F n a b)).eval x * Real.cos x) x =
-             (Polynomial.map (algebraMap ℚ ℝ) (f n a b)).eval x * Real.sin x := by
+lemma F_trig_product_rule (n : ℕ) (a b : ℕ) (x : ℝ) (hn : n > 0) (ha : a ≥ 0) (hb : b > 0) :
+  ∀ x : ℝ, deriv (fun x => (Polynomial.map (algebraMap ℚ ℝ)
+  (derivative (F n a b))).eval x * Real.sin x -
+  (Polynomial.map (algebraMap ℚ ℝ) (F n a b)).eval x * Real.cos x) x =
+  (Polynomial.map (algebraMap ℚ ℝ) (f n a b)).eval x * Real.sin x := by
+
   intro x
   let f_R := (f n a b).map (algebraMap ℚ ℝ)
   let F_R := (F n a b).map (algebraMap ℚ ℝ)
@@ -417,27 +419,28 @@ lemma F_trig_product_rule (n : ℕ) (a b : ℤ) (x : ℝ) (hn : n > 0) (ha : a �
   let F''_R := (derivative (derivative (F n a b))).map (algebraMap ℚ ℝ)
   have h_sin_diff : DifferentiableAt ℝ Real.sin x := Real.differentiableAt_sin
   have h_cos_diff : DifferentiableAt ℝ Real.cos x := Real.differentiableAt_cos
-  have h_poly_diff (P : ℝ[X]) : DifferentiableAt ℝ (fun y => P.eval y) x := 
+  have h_poly_diff (P : ℝ[X]) : DifferentiableAt ℝ (fun y => P.eval y) x :=
     P.differentiableAt
-  change deriv (fun x => F'_R.eval x * Real.sin x - F_R.eval x * Real.cos x) x = f_R.eval x * Real.sin x
-  simp [h_sin_diff, h_cos_diff, h_poly_diff] 
+  change deriv (fun x => F'_R.eval x * Real.sin x -
+  F_R.eval x * Real.cos x) x = f_R.eval x * Real.sin x
+  simp [h_sin_diff, h_cos_diff, h_poly_diff]
   have h1 : derivative F_R = F'_R := by
     simp [F_R, F'_R,]
   have h2 : derivative F'_R = F''_R := by
     simp [F'_R, F''_R,]
   rw [h1, h2]
   ring_nf
-  have h_factor : eval x F''_R * Real.sin x + Real.sin x * eval x F_R = 
-                  (eval x F''_R + eval x F_R) * Real.sin x := by
-    ring
-  rw[h_factor] 
+  have h_factor : eval x F''_R * Real.sin x + Real.sin x * eval x F_R =
+  (eval x F''_R + eval x F_R) * Real.sin x := by ring
+  rw[h_factor]
   rw [mul_comm (Real.sin x) (eval x f_R)]
   rw [← Polynomial.eval_add, ← Polynomial.map_add]
-  have h_total : (derivative (derivative (F n a b)) + F n a b).map (algebraMap ℚ ℝ) = 
-                 (F''_R + F_R) := by
+  have h_total :
+  (derivative (derivative (F n a b)) + F n a b).map (algebraMap ℚ ℝ)= (F''_R + F_R) := by
     simp [F''_R, F_R, Polynomial.map_add]
   rw [add_comm (derivative (derivative (F n a b)))]
   rw [F_telescope a b n hn ha hb]
+
 
 lemma f_sin_integral_equals_F_eval_pi_plus_F_eval_0 (n : ℕ) (a b : ℤ)(hb : b> 0 ) :
   definite_integral_f_sin n (a : ℚ) (b : ℚ) =
@@ -466,4 +469,3 @@ Irrational π := by
   by_contra h_rational
   push_neg at h_rational
   sorry
-
