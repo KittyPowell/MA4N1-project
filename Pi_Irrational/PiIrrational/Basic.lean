@@ -3,13 +3,21 @@ import Mathlib
 set_option linter.style.commandStart false
 set_option linter.unusedTactic false
 
-open Polynomial
+-- this project follows the layout of Niven's proof of irrationality of pi
+-- the work has been labelled to describe how it corresponds to his proof
+-- the final contradiction assumes pi = a/b so
+-- one is sometimes used to refer to the other throughout
 
+open Polynomial
+--defining f(x) as given in Niven's proof
 noncomputable def f (n : ℕ) (a : ℚ) (b : ℚ) : Polynomial ℚ :=
   (C (1 / (n.factorial : ℚ))) * (X^n * (C a - C b * X)^n)
 
+--defining n!f(x) for later use
 noncomputable def nfact_f (n : ℕ) (a b : ℚ) : Polynomial ℚ := C (n.factorial : ℚ) * f n a b
 
+-- proving n!f(x) has integral coefficients
+-- this is done in 2 ways to acccount for potential future use
 lemma nfact_f_integral (a b n : ℕ) :
   ∃ f : ℤ[X], nfact_f n a b = f.map (algebraMap ℤ ℚ) := by
     unfold nfact_f f
@@ -28,13 +36,17 @@ lemma nfact_f_integral_coeffs (k a b n : ℕ) : ∃ z : ℤ,
 open BigOperators
 open Finset
 
+--defining F(x) as given in Niven's proof
 noncomputable def F (n : ℕ) (a b : ℤ) : Polynomial ℚ :=
   ∑ k ∈ Finset.range (n+1), (C (-1 : ℚ))^k * (derivative^[2*k] (f n a b))
 
+-- showing f(0)=0
 lemma eval_f_at_zero_is_0 (n : ℕ) (a b : ℚ) (h : n ≠ 0): (f n a b).eval 0 = 0 := by
   simp [f, h]
   done
 
+-- showing f(a/b - x)= f(x)
+-- this is done in 3 ways to account for potential future uses
 lemma symmetry_of_f (x : ℚ) (n : ℕ) (a b : ℚ) (hb : b ≠ 0) :
 (f n a b).eval x = (f n a b).eval ((a / b) - x) := by
   simp [f]
@@ -76,6 +88,7 @@ f n a b = (f n a b).comp (C (a / b) - X) := by
   add_comm, add_left_comm, add_assoc] using
   (symmetry_of_f x n a b hb)
 
+-- proving a similar symmetry for the kth derivatives of f
 lemma symmetry_of_f_derivs (n k : ℕ) (a b : ℚ) (hb : b ≠ 0) :
 (derivative^[k] (f n a b)) = (C (-1 : ℚ))^k * (derivative^[k] (f n a b)).comp (C (a / b) - X) := by
   classical
@@ -119,6 +132,7 @@ lemma symmetry_of_f_derivs (n k : ℕ) (a b : ℚ) (hb : b ≠ 0) :
             ((derivative^[Nat.succ k] (f n a b)).comp q) := by
           simp [pow_succ, mul_comm]
 
+-- showing f(a/b)=0
 lemma eval_f_at_aoverb_is_0 (n : ℕ) (a b : ℚ) (hb : b ≠ 0) (hn : n ≠ 0) :
 (f n a b).eval (a / b) = 0 := by
   rw [symmetry_of_f]
@@ -127,6 +141,7 @@ lemma eval_f_at_aoverb_is_0 (n : ℕ) (a b : ℚ) (hb : b ≠ 0) (hn : n ≠ 0) 
   exact hb
   done
 
+-- the next 4 lemmas show that f and its derivatives take integer values at 0 and pi
 lemma f_integral_at_0 (n : ℕ) (a b : ℚ) (hn : n ≠ 0) : ∃ z : ℤ,
 (f n a b).eval 0 = (z : ℚ) := by
   use 0
@@ -197,6 +212,8 @@ lemma f_derivs_integral_at_pi (n k : ℕ) (a b : ℤ) (hb : b ≠ 0) :
   simp
   done
 
+-- the next 2 lemmas use the above to show F takes integer values at zero and pi
+
 lemma F_zero_integer (n : ℕ) (a b : ℤ) :
   ∃ z : ℤ, (F n a b).eval 0 = z := by
   unfold F
@@ -230,7 +247,7 @@ lemma F_pi_integer (n : ℕ) (a b : ℤ) (hb : b ≠ 0) :
   done
 
 
-
+-- showing F(0)+F(pi) is an integer
 lemma F_zero_plus_F_pi_integer (n : ℕ) (a b : ℤ) (hb : b ≠ 0) :
   ∃ z : ℤ, (F n a b).eval 0 + (F n a b).eval (a / b : ℚ) = z := by
   obtain ⟨z1, hz1⟩ := F_zero_integer n a b
@@ -240,10 +257,7 @@ lemma F_zero_plus_F_pi_integer (n : ℕ) (a b : ℤ) (hb : b ≠ 0) :
   rw [hz1, hz2]
   simp
 
-
-
-
-
+--showing the left-hand of the inequality at the end of Niven's proof
 lemma f_times_sin_greater_than_zero (x : ℝ) (n : ℕ) (a b : ℚ) (hb : b > 0) (h : Real.pi = a / b)
 (hxl : 0 < x) (hxu : x < Real.pi) :
 0 < ((Polynomial.map (algebraMap ℚ ℝ) (f n a b)).eval x * Real.sin x) := by
@@ -269,6 +283,7 @@ lemma f_times_sin_greater_than_zero (x : ℝ) (n : ℕ) (a b : ℚ) (hb : b > 0)
   exact mul_pos h2 h1
   done
 
+-- showing the right-hand side of the inequality at the end of Niven's proof
 lemma f_times_sin_less_than_bound (x : ℝ) (n : ℕ) (a b : ℚ)
 (hxl : 0 < x) (hxu : x < Real.pi) (hn : n ≠ 0) (ha : a ≥ 0) (hb : b > 0) (h : Real.pi = a / b):
 ((Polynomial.map (algebraMap ℚ ℝ) (f n a b)).eval x * Real.sin x)
@@ -351,18 +366,23 @@ lemma f_times_sin_less_than_bound (x : ℝ) (n : ℕ) (a b : ℚ)
 
   done
 
+-- defining the integral of f(x)sin(x) given in Niven's proof
 noncomputable def definite_integral_f_sin (n : ℕ) (a b : ℚ) : ℝ :=
   ∫ x in 0..Real.pi, (Polynomial.map (algebraMap ℚ ℝ) (f n a b)).eval x * Real.sin x
 
-lemma F_telescope (a b : ℕ) (n : ℕ) (hn : n > 0) (ha : a ≥ 0) (hb : b > 0) : (F n a b) + derivative (derivative (F n a b)) = (f n a b) := by
+-- a partially unfinished lemma to show F'' + F' = f, needed to simplify
+--the product rule application to f, F and trig functions given in Niven's proof
+lemma F_telescope (a b : ℕ) (n : ℕ) (hn : n > 0)
+(ha : a ≥ 0) (hb : b > 0) : (F n a b) + derivative (derivative (F n a b)) = (f n a b) := by
     unfold F
     simp_rw [derivative_sum, derivative_mul]
     rw [sum_range_succ_comm]
     rw [sum_range_succ']
     simp only [pow_zero, one_mul]
-    simp only [add_assoc, add_comm, add_left_comm]
-    rw [← sum_add_distrib]
-    have h_cancel : ∑ k ∈ range n, (C (-1 : ℚ) ^ (k + 1) * derivative^[2 * k + 2] (f n a b) + C (-1 : ℚ) ^ k * derivative^[2 * k + 2] (f n a b)) = 0 := by
+
+    have h_cancel : ∑ k ∈ range n,
+    (C (-1 : ℚ) ^ (k + 1) * derivative^[2 * k + 2]
+    (f n a b) + C (-1 : ℚ) ^ k * derivative^[2 * k + 2] (f n a b)) = 0 := by
       apply sum_eq_zero
       intro k _
       rw [← add_mul, pow_succ]
@@ -403,6 +423,7 @@ lemma F_telescope (a b : ℕ) (n : ℕ) (hn : n > 0) (ha : a ≥ 0) (hb : b > 0)
 
     sorry
 
+-- proving the product rule application to f, F and trig functions given in Niven's proof
 lemma F_trig_product_rule (n : ℕ) (a b : ℕ) (hn : n > 0) (ha : a ≥ 0) (hb : b > 0) :
   ∀ x : ℝ, deriv (fun x => (Polynomial.map (algebraMap ℚ ℝ)
   (derivative (F n a b))).eval x * Real.sin x -
@@ -438,8 +459,10 @@ lemma F_trig_product_rule (n : ℕ) (a b : ℕ) (hn : n > 0) (ha : a ≥ 0) (hb 
   rw [add_comm (derivative (derivative (F n a b)))]
   rw [F_telescope a b n hn ha hb]
 
-
-lemma f_sin_integral_equals_F_eval_pi_plus_F_eval_0(n : ℕ) (a b : ℕ) (hn : n > 0) (ha : a ≥ 0)(hb : b> 0 ) :
+--proving the equation labelled (1) in the linked PDF of Niven's proof
+-- about the integral of f(x)sin(x)
+lemma f_sin_integral_equals_F_eval_pi_plus_F_eval_0 (n : ℕ)
+(a b : ℕ) (hn : n > 0) (ha : a ≥ 0)(hb : b> 0 ) :
   definite_integral_f_sin n (a : ℚ) (b : ℚ) =
   (Polynomial.map (algebraMap ℚ ℝ) (F n a b)).eval Real.pi +
   (Polynomial.map (algebraMap ℚ ℝ) (F n a b)).eval 0 := by
@@ -461,7 +484,8 @@ lemma f_sin_integral_equals_F_eval_pi_plus_F_eval_0(n : ℕ) (a b : ℕ) (hn : n
     exact (F_trig_product_rule n a b hn ha hb x)
 
 
--- Theorem that pi is irrational
+-- Combining the work above into the theorem that pi is irrational
+-- partially unfinished
 theorem pi_irrational : Irrational Real.pi := by
   rw [irrational_iff_ne_rational]
   intro a_frac b_frac h_frac_pos h_pi_eq
