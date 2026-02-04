@@ -439,7 +439,7 @@ lemma F_trig_product_rule (n : ℕ) (a b : ℕ) (hn : n > 0) (ha : a ≥ 0) (hb 
   rw [F_telescope a b n hn ha hb]
 
 
-lemma f_sin_integral_equals_F_eval_pi_plus_F_eval_0(n : ℕ) (a b : ℕ)(hn : n > 0) (ha : a ≥ 0)(hb : b> 0 ) :
+lemma f_sin_integral_equals_F_eval_pi_plus_F_eval_0(n : ℕ) (a b : ℕ) (hn : n > 0) (ha : a ≥ 0)(hb : b> 0 ) :
   definite_integral_f_sin n (a : ℚ) (b : ℚ) =
   (Polynomial.map (algebraMap ℚ ℝ) (F n a b)).eval Real.pi +
   (Polynomial.map (algebraMap ℚ ℝ) (F n a b)).eval 0 := by
@@ -486,7 +486,6 @@ theorem pi_irrational : Irrational Real.pi := by
     intro n
     simp [I]
 
-
     have F0 : ∃ z : ℤ, (F n a b).eval 0 = z := by
       exact F_zero_integer n ↑a ↑b
     have Fpi : ∃ z : ℤ, (F n a b).eval (a / b : ℚ) = z := by
@@ -496,13 +495,43 @@ theorem pi_irrational : Irrational Real.pi := by
     obtain ⟨z1, hz1⟩ := F0
     obtain ⟨z2, hz2⟩ := Fpi
     use z1 + z2
-    push_cast
     sorry -- I am unsure why rw [← hz1] fails here.
 
   have I_pos : ∀ n, 0 < I n := by
     intro n
     simp [I]
-    sorry
+    refine intervalIntegral.intervalIntegral_pos_of_pos_on ?_ ?_ ?_
+
+    · apply Continuous.intervalIntegrable
+      apply Continuous.mul
+      · rw [f]
+        continuity
+      · exact Real.continuous_sin
+
+    · intro x hx
+      apply mul_pos
+
+      · rw [f]
+        simp
+        have x_pos : 0 < x := hx.1
+        have bx_lt_a : ↑b * x < ↑a := by
+          rw [h_pi_ab] at hx
+          have h_lt : x < ↑a / ↑b := hx.2
+          exact (lt_div_iff₀' hb_pos).mp h_lt
+        apply mul_pos
+        · apply inv_pos.mpr
+          norm_cast
+          exact Nat.factorial_pos n
+        · apply mul_pos
+          · exact pow_pos x_pos n
+          · apply pow_pos
+            simp
+            exact bx_lt_a
+
+      exact Real.sin_pos_of_mem_Ioo hx
+
+    exact Real.pi_pos
+
 
   have I_lim : Filter.Tendsto I Filter.atTop (nhds 0) := by
 
